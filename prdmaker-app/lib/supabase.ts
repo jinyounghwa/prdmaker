@@ -38,6 +38,15 @@ export async function saveApiKey(userId: string, provider: string, apiKey: strin
   return { data, error };
 }
 
+export async function deleteIntegration(userId: string, service: string) {
+  const { error } = await supabase
+    .from('integrations')
+    .delete()
+    .match({ user_id: userId, service: service });
+  
+  return { error };
+}
+
 export async function getApiKey(userId: string, provider: string) {
   // Supabase 클라이언트 대신 기본 옵션으로 다시 시도
   try {

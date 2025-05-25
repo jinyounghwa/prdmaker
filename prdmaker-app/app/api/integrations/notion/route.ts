@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, deleteIntegration } from '@/lib/supabase';
 
 // Notion API 호출 함수
 async function callNotionAPI(apiKey: string, databaseId: string, data: any) {
@@ -178,6 +178,55 @@ export async function POST(req: NextRequest) {
     console.error('Notion 연동 API 오류:', error);
     return NextResponse.json(
       { error: error.message || 'Notion 연동 중 오류가 발생했습니다.' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { userId } = await req.json();
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: '필수 파라미터가 누락되었습니다.' },
+        { status: 400 }
+      );
+    }
+
+    // 사용자 확인
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: '인증되지 않은 사용자입니다.' },
+        { status: 401 }
+      );
+    }
+
+    if (user.id !== userId) {
+      return NextResponse.json(
+        { error: '요청한 사용자와 인증된 사용자가 일치하지 않습니다.' },
+        { status: 401 }
+      );
+    }
+
+    // 연동 정보 삭제
+    const { error } = await deleteIntegration(userId, 'notion');
+
+    if (error) {
+      console.error('Notion 연동 정보 삭제 오류:', error);
+      return NextResponse.json(
+        { error: 'Notion 연동 정보 삭제 중 오류가 발생했습니다.' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('Notion 연동 삭제 API 오류:', error);
+    return NextResponse.json(
+      { error: error.message || 'Notion 연동 삭제 중 오류가 발생했습니다.' },
       { status: 500 }
     );
   }
