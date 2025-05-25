@@ -1,4 +1,4 @@
-<div><img src="prd_maker1.jpg" alt="prd_maker1" width="500" height="500"></div>
+<div><img src="./prdmaker-app/prd_maker1.jpg" alt="prd_maker1" width="500" height="500"></div>
 
 # PRD Maker (제품 요구사항 문서 생성기)
 
